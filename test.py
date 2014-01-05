@@ -1,7 +1,7 @@
 # coding=windows-1251
 from collections import Counter
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 __author__ = 'aafanasiev'
 date_format_1c = '%d.%m.%Y'
@@ -18,8 +18,13 @@ class ExchangeRate(object):
         self.endDate = datetime.date
         self.ratesDict = Counter()
 
-    def getRateFor(self, param):
-        return float(self.ratesDict[param])
+    def getRateFor(self, date=datetime.date):
+        rate = self.ratesDict[date]
+        if rate == 0:
+            date -= timedelta(days=1)
+            return self.getRateFor(date)
+        else:
+            return float(rate)
 
     def fetchRates(self, param, func):
         self.startDate = datetime.strptime(param[0], date_format_1c)
@@ -33,10 +38,9 @@ class ExchangeRate(object):
         for line in f.read().split('\r\n'):
             tokens = line.split(',')
             if len(tokens) > 5:
-                date = datetime.strptime(tokens[1], date_format_rbc).strftime(date_format_1c)
+                date = datetime.strptime(tokens[1], date_format_rbc)
                 self.ratesDict[date] = tokens[5]
-                print date + " - " + tokens[5]
-
+                print date.__str__() + " - " + tokens[5]
 
         func(self)
 
@@ -49,7 +53,8 @@ class Parser1C():
         outputfile = open('Export_USD.txt', 'a')
         tokens = striped(line).split("=")
         if tokens[0] == 'Дата':
-            self.currentRate = rates.getRateFor(tokens[1])
+            date = datetime.strptime(tokens[1], date_format_1c)
+            self.currentRate = rates.getRateFor(date)
         if tokens[0] == 'Сумма':
             usdValue = float(tokens[1])
             value = (self.currentRate * usdValue)
