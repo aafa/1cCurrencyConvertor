@@ -1,4 +1,4 @@
-# coding=windows-1251
+# coding=utf-8
 from collections import Counter
 import urllib
 from datetime import datetime, timedelta
@@ -8,8 +8,16 @@ date_format_1c = '%d.%m.%Y'
 date_format_rbc = '%Y-%m-%d'
 
 
-def striped(line):
-    return line.strip('\r\n')
+def imported(line):
+    return line.decode('windows-1251').encode('utf-8').strip('\r\n')
+
+
+def exported(line):
+    return line.decode('utf-8').encode('windows-1251')
+
+
+def showDate(date):
+    return datetime.strftime(date, date_format_1c)
 
 
 class ExchangeRate(object):
@@ -34,13 +42,14 @@ class ExchangeRate(object):
             self.startDate.day, self.startDate.month, self.startDate.year, self.endDate.day, self.endDate.month,
             self.endDate.year)
         f = urllib.urlopen(link)
-        print "œÓÎÛ˜ÂÌ˚ ‰‡ÌÌ˚Â ÓÚ –¡ :"
+        print "–ü–æ–ª—É—á–µ–Ω—ã –¥–∞–Ω–Ω—ã–µ –æ—Ç –†–ë–ö:"
+        print "-----------------------"
         for line in f.read().split('\r\n'):
             tokens = line.split(',')
             if len(tokens) > 5:
                 date = datetime.strptime(tokens[1], date_format_rbc)
                 self.ratesDict[date] = tokens[5]
-                print date.__str__() + " - " + tokens[5]
+                print showDate(date) + " - " + tokens[5]
 
         func(self)
 
@@ -51,15 +60,17 @@ class Parser1C():
 
     def process(self, line, rates=ExchangeRate):
         outputfile = open('Export_USD.txt', 'a')
-        tokens = striped(line).split("=")
-        if tokens[0] == 'ƒ‡Ú‡':
+        tokens = imported(line).split("=")
+        if tokens[0] == '–î–∞—Ç–∞':
             date = datetime.strptime(tokens[1], date_format_1c)
+            self.currenDate = date
             self.currentRate = rates.getRateFor(date)
-        if tokens[0] == '—ÛÏÏ‡':
+        if tokens[0] == '–°—É–º–º–∞':
             usdValue = float(tokens[1])
             value = (self.currentRate * usdValue)
-            outputfile.write("—ÛÏÏ‡={:0.2f}\r\n".format(value))
-            print value
+            exportLine = exported("–°—É–º–º–∞={:0.2f}\r\n".format(value))
+            outputfile.write(exportLine)
+            print "–ò—Å–ø—Ä–∞–≤–ª–µ–Ω–æ: {3} –Ω–∞ {0:0.2f} –ø–æ –∫—É—Ä—Å—É: {1} –Ω–∞ –¥–∞—Ç—É: {2}".format(value, self.currentRate, showDate(self.currenDate), usdValue)
         else:
             outputfile.write(line)
 
@@ -72,16 +83,18 @@ class ReadFile:
 
     def start(self, rates):
         self.inputfile = open('Export_to_1c-4_USD.txt')
+        print "-----------------------"
+
         for line in self.inputfile:
             self.parser.process(line, rates)
 
     def bounds(self):
         boundDates = ['', '']
         for line in self.inputfile:
-            tokens = striped(line).split('=')
-            if tokens[0] == 'ƒ‡Ú‡Õ‡˜‡Î‡':
+            tokens = imported(line).split('=')
+            if tokens[0] == '–î–∞—Ç–∞–ù–∞—á–∞–ª–∞':
                 boundDates[0] = tokens[1]
-            if tokens[0] == 'ƒ‡Ú‡ ÓÌˆ‡':
+            if tokens[0] == '–î–∞—Ç–∞–ö–æ–Ω—Ü–∞':
                 boundDates[1] = tokens[1]
                 break
         return boundDates
