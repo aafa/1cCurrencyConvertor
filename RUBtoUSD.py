@@ -7,6 +7,14 @@ __author__ = 'aafanasiev'
 date_format_1c = '%d.%m.%Y'
 date_format_rbc = '%Y-%m-%d'
 
+# ==========================================
+# Параметры
+# ==========================================
+
+input = 'Export_to_1c-4_USD.txt'  # входной файл
+output = 'Export_USD.txt'  # выходной файл
+
+# ==========================================
 
 def imported(line):
     return line.decode('windows-1251').encode('utf-8').strip('\r\n')
@@ -56,10 +64,10 @@ class ExchangeRate(object):
 
 class Parser1C():
     def __init__(self):
-        open('Export_USD.txt', 'w')
+        open(output, 'w')
 
     def process(self, line, rates=ExchangeRate):
-        outputfile = open('Export_USD.txt', 'a')
+        outputfile = open(output, 'a')
         tokens = imported(line).split("=")
         if tokens[0] == 'Дата':
             date = datetime.strptime(tokens[1], date_format_1c)
@@ -78,11 +86,11 @@ class Parser1C():
 class ReadFile:
     def __init__(self, p):
         self.parser = p
-        self.inputfile = open('Export_to_1c-4_USD.txt')
+        self.inputfile = open(input)
 
 
     def start(self, rates):
-        self.inputfile = open('Export_to_1c-4_USD.txt')
+        self.inputfile = open(input)
         print "-----------------------"
 
         for line in self.inputfile:
