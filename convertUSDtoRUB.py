@@ -2,6 +2,8 @@
 from collections import Counter
 import urllib
 from datetime import datetime, timedelta
+import sys
+import os.path
 
 __author__ = 'aafanasiev'
 date_format_1c = '%d.%m.%Y'
@@ -13,6 +15,10 @@ date_format_rbc = '%Y-%m-%d'
 
 input = 'Export_to_1c-4_USD.txt'  # входной файл
 output = 'Export_USD.txt'  # выходной файл
+
+if (not os.path.isfile(input)):
+    print "Входной файл " + input + " не найден."
+    sys.exit(1)    
 
 # ==========================================
 
