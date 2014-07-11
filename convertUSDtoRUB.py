@@ -2,6 +2,8 @@
 from collections import Counter
 import urllib
 from datetime import datetime, timedelta
+import sys
+import os.path
 
 __author__ = 'aafanasiev'
 date_format_1c = '%d.%m.%Y'
@@ -11,8 +13,18 @@ date_format_rbc = '%Y-%m-%d'
 # Параметры
 # ==========================================
 
-input = 'Export_to_1c-4_USD.txt'  # входной файл
-output = 'Export_USD.txt'  # выходной файл
+if (len(sys.argv) >= 3): 
+    # входной и выходной файлы беруться из командной строки
+    input = sys.argv[1] 
+    output = sys.argv[2]
+else: 
+    # или же используются входной и выходной файл по умолчанию
+    input = 'Export_to_1c-4_USD.txt'  # входной файл
+    output = 'Export_USD.txt'  # выходной файл
+
+if (not os.path.isfile(input)):
+    print "Входной файл " + input + " не найден."
+    sys.exit(1)    
 
 # ==========================================
 
